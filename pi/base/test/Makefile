@@ -1,19 +1,19 @@
 CC=g++
 LDFLAGS=
 CPPFLAGS=-I /home/seth/git-repo/pi-net/
-SRC=$(wildcard *.cc)
-OBJ=$(patsubst %.cc,%.o,$(SRC))
-TARGET=$(basename $(SRC))
+Test=AtomicUnitTest    \
+	 MutexUnitTest     \
 
-all:$(TARGET)
+all:$(Test)
 
-$(TARGET): $(OBJ)
-	$(CC) -o $@ $<
-%.o:%.cc
-	$(CC) -o $@ -c $< $(CPPFLAGS)
+$(Test):
+	$(CC) -o $@ $(filter %.cc,$^) $(CPPFLAGS) -lpthread
+
+AtomicUnitTest: AtomicUnitTest.cc
+
+MutexUnitTest: MutexUnitTest.cc
 
 .PHONY:clean
 
 clean:
-	rm -rf $(TARGET)
-	rm -rf $(OBJ)
+	rm -rf $(Test)
