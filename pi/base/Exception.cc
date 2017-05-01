@@ -5,27 +5,28 @@
 
 using namespace pi;
 
+Exception::Exception(const char* what)
+    : message_(what)
+{
+    fillStackTrace();
+}
+
 Exception::Exception(const string& what)
     : message_(what)
 {
     fillStackTrace();
 }
 
-Exception::Exception(const char* what)
-    : message_(what)
-{
-    fillStackTrace();
-}
 Exceptoin::~Exception() throw()
 {
 }
 
-cosnt char* Exception::what()
+cosnt char* Exception::what() const throw()
 {
     return message_.c_str();
 }
 
-const char* stackTrace()
+const char* Exception::stackTrace() const throw()
 {
     return stack_.c_str();
 }
@@ -35,7 +36,7 @@ void Exceptoin::fillStackTrace()
     const int len = 200;
     void* buffer[len];
     int nptrs = ::backtrace(buffer, len);
-    char** strings = ::backtrace_symbols(buffer, len);
+    char** strings = ::backtrace_symbols(buffer, nptrs);
     if (strings)
     {
         for (int i = 0; i < nptrs; ++i)
