@@ -3,7 +3,7 @@ LDFLAGS=
 CPPFLAGS=-I /home/seth/git-repo/pi-net/
 Test=AtomicUnitTest    \
 	 MutexUnitTest     \
-
+	TimestampUnitTest
 all:$(Test)
 
 $(Test):
@@ -11,8 +11,9 @@ $(Test):
 
 AtomicUnitTest: AtomicUnitTest.cc
 
-MutexUnitTest: MutexUnitTest.cc
+MutexUnitTest: MutexUnitTest.cc ../Thread.cc
 
+TimestampUnitTest: TimestampUnitTest.cc ../Timestamp.cc
 .PHONY:clean
 
 clean:

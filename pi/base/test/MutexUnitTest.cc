@@ -2,16 +2,6 @@
 #include <pthread.h>
 #include <pi/base/Mutex.h>
 
-void CurrentThread::cacheTid()
-{
-  if (t_cachedTid == 0)
-  {
-    t_cachedTid = detail::gettid();
-    t_tidStringLength = snprintf(t_tidString, sizeof t_tidString, "%5d ", t_cachedTid);
-  }
-}
-
-
 int count = 0;
 pi::MutexLock lock;
 
@@ -25,8 +15,8 @@ void * start(void *)
     }
 }
 
-using namespace std;
-
+using std::cout;
+using std::endl;
 int main()
 {
     cout << "Hello C++ !" << endl;

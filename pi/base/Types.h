@@ -2,8 +2,8 @@
 #define PI_BASE_TYPES_H
 
 #include <stdint.h>
-#ifndef PI_STD_STRING
-#define <string>
+#ifdef PI_STD_STRING
+#include <string>
 #else
 #include <ext/vstring.h>
 #include <ext/vstring_fwd.h>
@@ -13,12 +13,12 @@
 #include <assert.h>
 #endif
 
-namsespace pi
+namespace pi
 {
 #ifdef PI_STD_STRING
 using std::string;
 #else
-typedef __gnu_cxx:__sso_string string;
+typedef __gnu_cxx::__sso_string string;
 #endif
 
 template<typename To, typename From>
@@ -42,3 +42,4 @@ inline To down_cast(From* f)
 }
 
 }
+#endif
