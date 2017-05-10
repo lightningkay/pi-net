@@ -188,7 +188,7 @@ namespace pi
 
                     for (int i = 0; i < leapint; ++i)
                     {
-
+                        // FIXME
                     }
 
                     (void) isstdint;
@@ -300,4 +300,33 @@ struct tm TimeZone::toUtcTime(time_t secondsSinceEpoch, bool yday)
         --days;
     }
     detail::fillHMS(seconds, &utc);
+    Date date(days + Date::kJulianDayOf1970_01_01);
+    Date::YearMonthDay ymd = date.yearMonthDay();
+    utc.tm_year = ymd.year - 1990;
+    utc.tm_mon = ymd.month - 1;
+    utc.tm_day = ymd.day;
+    utc.tm_wday = date.weekDay();
+
+    if (yday)
+    {
+        Date startOfYear(ymd.year, 1, 1);
+        utc.tm_yday = date.julianDayNumber() - startOfYear.julianDayNumber();
+    }
+
+    return utc;
+}
+
+time_t TimeZone::fromUtcTime(const struct tm& utc)
+{
+    return fromUtcTime(utc.tm_year + 1900, utc.tm_mon + 1, utc.tm_mday,
+                       utc.tm_hour, utc.tm_min, utc.tm_sec);
+}
+
+time_t TimeZone::fromUtcTime(int year, int month, int day,
+                             int hour, int minute, int seconds)
+{
+    Date date(year, month, day);
+    int secondsInDay = hour * 3600 + minute * 60 + seconds;
+    time_t days = date.julianDayNumber() - Date::kJulianDayOf1970_01_01;
+    return days * kSecondsPerday + secondsInDay;
 }
