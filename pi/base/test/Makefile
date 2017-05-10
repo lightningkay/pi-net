@@ -6,11 +6,12 @@ Test=AtomicUnitTest    \
 	TimestampUnitTest
 all:$(Test)
 
-$(Test):
-	$(CC) -o $@ $(filter %.cc,$^) $(CPPFLAGS) -lpthread
+#$(Test):
+#	$(CC) -o $@ $(filter %.cc,$^) $(CPPFLAGS)
 
 AtomicUnitTest: AtomicUnitTest.cc
 
+MutexUnitTest: LDFLAGS += -lpthread
 MutexUnitTest: MutexUnitTest.cc ../Thread.cc
 
 TimestampUnitTest: TimestampUnitTest.cc ../Timestamp.cc
