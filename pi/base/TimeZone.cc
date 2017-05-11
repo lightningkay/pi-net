@@ -49,9 +49,9 @@ namespace pi
             bool equal(const Transition& lhs, const Transition& rhs) const
             {
                 if (compareGmt)
-                    return lhs.gmttime = rhs.gmttime;
+                    return lhs.gmttime == rhs.gmttime;
                 else
-                    return lhs.localtime = rhs.localtime;
+                    return lhs.gmttime == rhs.localtime;
             }
         };
 
@@ -76,7 +76,7 @@ namespace pi
         }
 
     }
-    const int kSecondsPerday = 24 * 60 * 60;
+    const int kSecondsPerDay = 24 * 60 * 60;
 }
 
 using namespace pi;
@@ -92,9 +92,9 @@ struct TimeZone::Data
 
 namespace pi
 {
-    namespace detial
+    namespace detail
     {
-        class File : boost::noncopable
+        class File : boost::noncopyable
         {
         public:
             File(const char* file)
@@ -130,6 +130,15 @@ namespace pi
                 return be32toh(x);
             }
 
+            uint8_t readUInt8()
+            {
+                uint8_t x = 0;
+                ssize_t nr = ::fread(&x, 1, sizeof(uint8_t), fp_);
+                if (nr != sizeof(uint8_t))
+                    throw logic_error("bad uint8_t data");
+                return x;
+            }
+
         private:
             FILE* fp_;
         };
@@ -148,7 +157,7 @@ namespace pi
                     f.readBytes(15);
 
                     int32_t isgmtcnt = f.readInt32();
-                    int32_t isstdcont = f.readInt32();
+                    int32_t isstdcnt = f.readInt32();
                     int32_t leapcnt = f.readInt32();
                     int32_t timecnt = f.readInt32();
                     int32_t typecnt = f.readInt32();
@@ -164,7 +173,7 @@ namespace pi
 
                     for (int i = 0; i < timecnt; ++i)
                     {
-                        uint8_t local = f.readUInt();
+                        uint8_t local = f.readUInt8();
                         localtimes.push_back(local);
                     }
 
@@ -172,7 +181,7 @@ namespace pi
                     {
                         int32_t gmtoff = f.readInt32();
                         uint8_t isdst = f.readUInt8();
-                        uint8_t abbrind = f.readUint8();
+                        uint8_t abbrind = f.readUInt8();
 
                         data->localtimes.push_back(Localtime(gmtoff, isdst, abbrind));
                     }
@@ -181,17 +190,17 @@ namespace pi
                     {
                         int localIdx = localtimes[i];
                         time_t localtime = trans[i] + data->localtimes[localIdx].gmtOffset;
-                        data->transitions.push_back(Transition(trans[i]));
+                        data->transitions.push_back(Transition(trans[i], localtime, localIdx));
                     }
 
                     data->abbreviation = f.readBytes(charcnt);
 
-                    for (int i = 0; i < leapint; ++i)
+                    for (int i = 0; i < leapcnt; ++i)
                     {
                         // FIXME
                     }
 
-                    (void) isstdint;
+                    (void) isstdcnt;
                     (void) isgmtcnt;
                 }
                 catch (logic_error& e)
@@ -246,7 +255,7 @@ TimeZone::TimeZone(int eastOfUtc, const char* name)
 struct tm TimeZone::toLocalTime(time_t seconds) const
 {
     struct tm localTime;
-    bzero(&localtime, sizeof(localTime));
+    bzero(&localTime, sizeof(localTime));
     assert(data_ != NULL);
     const Data& data(*data_);
 
@@ -304,7 +313,7 @@ struct tm TimeZone::toUtcTime(time_t secondsSinceEpoch, bool yday)
     Date::YearMonthDay ymd = date.yearMonthDay();
     utc.tm_year = ymd.year - 1990;
     utc.tm_mon = ymd.month - 1;
-    utc.tm_day = ymd.day;
+    utc.tm_mday = ymd.day;
     utc.tm_wday = date.weekDay();
 
     if (yday)
@@ -328,5 +337,5 @@ time_t TimeZone::fromUtcTime(int year, int month, int day,
     Date date(year, month, day);
     int secondsInDay = hour * 3600 + minute * 60 + seconds;
     time_t days = date.julianDayNumber() - Date::kJulianDayOf1970_01_01;
-    return days * kSecondsPerday + secondsInDay;
+    return days * kSecondsPerDay + secondsInDay;
 }

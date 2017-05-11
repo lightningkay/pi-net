@@ -47,13 +47,13 @@ namespace pi
             : ptr_(reinterpret_cast<const char*>(str)),
               length_(static_cast<int>(strlen(ptr_))) { }
         StringPiece(const string& str)
-            : ptr_(str.data()), length(static_cast<int>(str.size())) { }
+            : ptr_(str.data()), length_(static_cast<int>(str.size())) { }
 #ifndef PI_STD_STRING
         StringPiece(const std::string &str)
-            : ptr_(str.data()), length(static_cast<int>(str.szie())) { }
+            : ptr_(str.data()), length_(static_cast<int>(str.size())) { }
 #endif
         StringPiece(const char* offset, int len)
-            : ptr(offset), length_(len) { }
+            : ptr_(offset), length_(len) { }
 
         const char* data() const { return ptr_; }
         int size() const { return length_; }
@@ -97,21 +97,21 @@ namespace pi
             return !(*this == x);
         }
 
-#define STRINGPIECE_BINARY_PREDICATE(cmp, auxcmp)                               \
+#define STRINGPIECE_BINARY_PREDICATE(cmp, auxcmp)                                   \
         bool operator cmp (const StringPiece& x) const                              \
         {                                                                           \
-            int r = memcmp(ptr_, xptr_, length_ < x.length_ ? length_ : x.length_); \
+            int r = memcmp(ptr_, ptr_, length_ < x.length_ ? length_ : x.length_);  \
             return ((r auxcmp 0) || ((r == 0) && (length_ cmp x.length_)));         \
         }
         STRINGPIECE_BINARY_PREDICATE(<, <)
-            STRINGPIECE_BINARY_PREDICATE(<=, <)
-            STRINGPIECE_BINARY_PREDICATE(>=, >)
-            STRINGPIECE_BINARY_PREDICATE(>, >)
+        STRINGPIECE_BINARY_PREDICATE(<=, <)
+        STRINGPIECE_BINARY_PREDICATE(>=, >)
+        STRINGPIECE_BINARY_PREDICATE(>, >)
 #undef STRINGPIECE_BINARY_PREDICATE
 
-            int compare(const SringPiece& x) const
+            int compare(const StringPiece& x) const
             {
-                int r = memcmp(ptr_, xptr_, length_ < x.length_ ? length_ : x.length_);
+                int r = memcmp(ptr_, x.ptr_, length_ < x.length_ ? length_ : x.length_);
                 if ( r == 0 )
                 {
                     if (length_ < x.length_) r = -1;
@@ -139,7 +139,7 @@ namespace pi
 
         bool starts_with(const StringPiece& x) const
         {
-            return ((length_ >= x.length) && memcmp(ptr_, x.length_) == 0);
+            return ((length_ >= x.length_) && memcmp(ptr_, x.ptr_, x.length_) == 0);
         }
     };
 }

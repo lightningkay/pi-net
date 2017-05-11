@@ -18,8 +18,7 @@ namespace pi
 
         struct Date::YearMonthDay getYearMonthDay(int julianDayNumber)
         {
-            int a = julianDayNumer + 32044;
-            int y = year + 4800 - a;
+            int a = julianDayNumber + 32044;
             int b = (4 * b + 3) / 146097;
             int c = a - ((b * 146097) / 4);
             int d = (4 * c + 3) / 1461;

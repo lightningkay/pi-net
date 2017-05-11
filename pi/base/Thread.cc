@@ -46,12 +46,12 @@ namespace pi
                 ThreadNameInitializer()
                 {
                     pi::CurrentThread::t_threadName = "main";
-                    pi::CurrentThread:tid();
+                    pi::CurrentThread::tid();
                     pthread_atfork(NULL, NULL, &afterFork);
                 }
         };
 
-        ThreadNameInitialize init;
+        ThreadNameInitializer init;
 
         struct ThreadData
         {
@@ -70,17 +70,17 @@ namespace pi
 
             void runInThread()
             {
-                pid_t tid = muduo::CurrentThread::tid();
+                pid_t tid = pi::CurrentThread::tid();
 
                 boost::shared_ptr<pid_t> ptid = wkTid_.lock();
                 if (ptid)
                 {
-                    *pid = tid;
+                    *ptid = tid;
                     ptid.reset();
                 }
 
-                pi::CurrentThread:t_threadName = name_.empty() ? "piThread" : name_.c_str();
-                ::prctl(PR_SET_NAME, pi::Current::t_threadName);
+                pi::CurrentThread::t_threadName = name_.empty() ? "piThread" : name_.c_str();
+                ::prctl(PR_SET_NAME, pi::CurrentThread::t_threadName);
                 try
                 {
                     func_();
@@ -113,11 +113,11 @@ namespace pi
 }
 
 using namespace pi;
-void CurrenThread::cacheTid()
+void CurrentThread::cacheTid()
 {
     if (t_cachedTid == 0)
     {
-        t_cachedTid == detial::gettid();
+        t_cachedTid == detail::gettid();
         t_tidStringLength = snprintf(t_tidString, sizeof t_tidString, "%5d ", t_cachedTid);
     }
 }
@@ -145,7 +145,7 @@ Thread::Thread(const ThreadFunc& func, const string& n)
       func_(func),
       name_(n)
 {
-    setDefaulName();
+    setDefaultName();
 }
 
 Thread::~Thread()

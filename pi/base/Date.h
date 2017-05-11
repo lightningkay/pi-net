@@ -31,7 +31,7 @@ namespace pi
             : julianDayNumber_(julianDayNum)
         {}
 
-        expicit Date(const stuct tm&);
+        explicit Date(const struct tm&);
 
         void swap(Date& that)
         {
@@ -55,7 +55,7 @@ namespace pi
             return (julianDayNumber_ + 1) % kDaysPerWeek;
         }
 
-        int julianDayNumber() const { return julianDayNumber_ };
+        int julianDayNumber() const { return julianDayNumber_; }
 
     private:
         int julianDayNumber_;
@@ -66,7 +66,7 @@ namespace pi
         return x.julianDayNumber() < y.julianDayNumber();
     }
 
-    inline bool operator==(Date x, Date y);
+    inline bool operator==(Date x, Date y)
     {
         return x.julianDayNumber() == y.julianDayNumber();
     }

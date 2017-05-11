@@ -13,83 +13,82 @@
 namespace pi
 {
 
-__thread char t_errnobuf[512];
-__thread char t_time[32];
-__thread time_t t_lastsecond;
+    __thread char t_errnobuf[512];
+    __thread char t_time[32];
+    __thread time_t t_lastSecond;
 
-const char* strerror_tl(int savedErrno)
-{
-    return sterror_r(savedErrno, t_errnobuf, sizeof t_errnobuf);
-}
-
-Logger::LogLevel initLogLevel()
-{
-    if (::getenv("PI_LOG_TRACE"))
-        return Logger::TRACE;
-    else if (::getenv("PI_LOG_DEBUG"))
-        return Logger::DEBUG;
-    else
-        return Logger::INFO
-}
-
-Logger::LogLevel g_logLevel = initLogLevel();
-
-const char* LogLevelName[Logger::NUM_LOG_LEVLES] =
-{
-    "TRACE ",
-    "DEBUG ",
-    "INFO  ",
-    "WARN  ",
-    "ERROR ",
-    "FATAL "
-}
-
-class T
-{
-public:
-    T(const char* str, unsigned len)
-        : str_(str),
-          len_(len)
+    const char* strerror_tl(int savedErrno)
     {
-        assert(strlen(str) = len_)
+        return strerror_r(savedErrno, t_errnobuf, sizeof t_errnobuf);
     }
-    const char* str_;
-    const unsigned len_;
-};
 
-inline LogStream& operator<<(LogStream& s, T v)
-{
-    s.append(v.str_, v.len_);
-    return s;
-}
+    Logger::LogLevel initLogLevel()
+    {
+        if (::getenv("PI_LOG_TRACE"))
+            return Logger::TRACE;
+        else if (::getenv("PI_LOG_DEBUG"))
+            return Logger::DEBUG;
+        else
+            return Logger::INFO;
+    }
 
-inline LogStream& operator<<(LogStream& s, const Logger::SourceFile& v)
-{
-    s.appedn(v.data_, v.size_);
-}
+    Logger::LogLevel g_logLevel = initLogLevel();
 
-void defaultOutput(const char* msg, int len)
-{
-    size_t n = fwrite(msg, 1, len, stdout);
-    // check n
-    (void)n;
-}
+    const char* LogLevelName[Logger::NUM_LOG_LEVELS] =
+    {
+        "TRACE ",
+        "DEBUG ",
+        "INFO  ",
+        "WARN  ",
+        "ERROR ",
+        "FATAL "
+    };
 
-void defaultFlush()
-{
-    fflush(stdout);
-}
+    class T
+    {
+        public:
+            T(const char* str, unsigned len)
+                : str_(str),
+                len_(len)
+        {
+            assert(strlen(str) == len_);
+        }
+            const char* str_;
+            const unsigned len_;
+    };
 
-Logger::OutputFunc g_output = defaultOutPut;
-Logger::FlushFunc g_flush = defaultFlush;
-TimeZone g_logTimeZone;
+    inline LogStream& operator<<(LogStream& s, T v)
+    {
+        s.append(v.str_, v.len_);
+        return s;
+    }
 
+    inline LogStream& operator<<(LogStream& s, const Logger::SourceFile& v)
+    {
+        s.append(v.data_, v.size_);
+    }
+
+    void defaultOutput(const char* msg, int len)
+    {
+        size_t n = fwrite(msg, 1, len, stdout);
+        // check n
+        (void)n;
+    }
+
+    void defaultFlush()
+    {
+        fflush(stdout);
+    }
+
+    Logger::OutputFunc g_output = defaultOutput;
+    Logger::FlushFunc g_flush = defaultFlush;
+    TimeZone g_logTimeZone;
 }
 
 using namespace pi;
 
-Looger::Impl::Impl(LogLevel level, int savedErrno, const SourceFile& file, int line)
-    : time_(Timestamp::now())
+Logger::Impl::Impl(LogLevel level, int savedErrno, const SourceFile& file, int line)
+    : time_(Timestamp::now()),
       stream_(),
       level_(level),
       line_(line),
@@ -108,7 +107,7 @@ Looger::Impl::Impl(LogLevel level, int savedErrno, const SourceFile& file, int l
 void Logger::Impl::formatTime()
 {
     int64_t microSecondsSinceEpoch = time_.microSecondsSinceEpoch();
-    time_t seconds = static_cast<time_t>(microSecondsSinceEpoch / Timstamp::kMicroSecondsPerSecond);
+    time_t seconds = static_cast<time_t>(microSecondsSinceEpoch / Timestamp::kMicroSecondsPerSecond);
     int microseconds = static_cast<int>(microSecondsSinceEpoch % Timestamp::kMicroSecondsPerSecond);
     if (seconds != t_lastSecond)
     {
@@ -124,8 +123,8 @@ void Logger::Impl::formatTime()
         }
 
         int len = snprintf(t_time, sizeof(t_time), "%4d%02d%02d %02d:%02d:%02d",
-            tm_time.tm_year + 1990, tm_time.tm_mon + 1, tm_time,tm_mday,
-            tm_time,tm_hour, tm_time.tm_min, tm_time.tm_sec);
+            tm_time.tm_year + 1990, tm_time.tm_mon + 1, tm_time.tm_mday,
+            tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec);
         assert(len == 17);
         (void) len;
     }
@@ -136,6 +135,11 @@ void Logger::Impl::formatTime()
         assert(us.length() == 8);
         stream_ << T(t_time, 17) << T(us.data(), 8);
     }
+}
+
+void Logger::Impl::finish()
+{
+    stream_ << " _ " << basename_ << ':' << line_ << '\n';
 }
 
 Logger::Logger(SourceFile file, int line)
@@ -154,10 +158,11 @@ Logger::Logger(SourceFile file, int line, LogLevel level)
 {
 }
 
-Logger::Logger(Sourcefile file, int line, bool toAbort)
+Logger::Logger(SourceFile file, int line, bool toAbort)
     : impl_(toAbort?FATAL:ERROR, errno, file, line)
 {
 }
+
 
 Logger::~Logger()
 {
@@ -171,9 +176,9 @@ Logger::~Logger()
     }
 }
 
-void Logger::setLogLevel(Logger::LoggerLevel level)
+void Logger::setLogLevel(Logger::LogLevel level)
 {
-    g_logLevle = levle;
+    g_logLevel = level;
 }
 
 void Logger::setOutput(OutputFunc out)
@@ -181,7 +186,7 @@ void Logger::setOutput(OutputFunc out)
     g_output = out;
 }
 
-void Logger::setFulsh(FlushFunc flush)
+void Logger::setFlush(FlushFunc flush)
 {
     g_flush = flush;
 }
