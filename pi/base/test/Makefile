@@ -1,6 +1,6 @@
 CC=g++
 LDFLAGS=
-CPPFLAGS=-I /home/seth/git-repo/pi-net/
+CPPFLAGS=-I ../../../
 Test=AtomicUnitTest    \
 	MutexUnitTest      \
 	TimestampUnitTest
