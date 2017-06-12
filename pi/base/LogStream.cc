@@ -14,10 +14,10 @@ using namespace pi::detail;
 
 namespace pi
 {
-    namespace detal
+    namespace detail
     {
         const char digits[] = "9876543210123456789";
-        cosnt char* zero = digits + 9;
+        const char* zero = digits + 9;
         BOOST_STATIC_ASSERT(sizeof(digits) == 20);
 
         const char digitsHex[] = "0123456789ABCDEF";
@@ -62,14 +62,14 @@ namespace pi
         }
 
         template class FixedBuffer<kSmallBuffer>;
-        template class FixedBUffer<kLargeBuffer>;
+        template class FixedBuffer<kLargeBuffer>;
     }
 }
 
 template<int SIZE>
-const char* FixeBuffer<SIZE>::debugString()
+const char* FixedBuffer<SIZE>::debugString()
 {
-    *cur = '\0';
+    *cur_ = '\0';
     return data_;
 }
 
@@ -79,7 +79,7 @@ void FixedBuffer<SIZE>::cookieStart()
 }
 
 template<int SIZE>
-void FixeBuffer<SIZE>::cookieEnd()
+void FixedBuffer<SIZE>::cookieEnd()
 {
 }
 
@@ -162,7 +162,7 @@ LogStream& LogStream::operator<<(double v)
 template<typename T>
 Fmt::Fmt(const char* fmt, T val)
 {
-    BOOST_STATIC_ASSERT(boost::is_arthmetic<T>::value == true);
+    BOOST_STATIC_ASSERT(boost::is_arithmetic<T>::value == true);
     length_ = snprintf(buf_, sizeof buf_, fmt, val);
     assert(static_cast<size_t>(length_) < sizeof buf_);
 }

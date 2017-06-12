@@ -16,7 +16,7 @@ namespace pi
     {
         const int kSmallBuffer = 4000;
         const int kLargeBuffer = 4000 * 1000;
-        template<int >
+        template<int SIZE>
         class FixedBuffer : boost::noncopyable
         {
         public:
@@ -39,11 +39,12 @@ namespace pi
             int length() const { return static_cast<int>(cur_ - data_); }
             char* current() { return cur_; }
             int avail() const { return static_cast<int>(end() - cur_); }
+            void add(size_t len) { cur_ += len; }
 
             void reset() { cur_ = data_; }
             void bzero() { ::bzero(data_, sizeof data_); }
             const char* debugString();
-            void setCookie(void (*cookie)) { cookie_ = cookie; }
+            void setCookie(void (*cookie)()) { cookie_ = cookie; }
             string toString() const { return string(data_, length()); }
             StringPiece toStringPiece() const { return StringPiece(data_, length()); }
         private:
@@ -65,7 +66,7 @@ namespace pi
 
         self& operator<<(bool v)
         {
-            buffer_.apped(v ? "1" : "0", 1);
+            buffer_.append(v ? "1" : "0", 1);
             return *this;
         }
 
@@ -113,13 +114,19 @@ namespace pi
 
         self& operator<<(const string& v)
         {
-            buffer_.append(v.cstr(), v.size());
+            buffer_.append(v.c_str(), v.size());
             return *this;
         }
 #ifndef PI_STD_STRING
         self& operator<<(const std::string& v)
         {
             buffer_.append(v.c_str(), v.size());
+            return *this;
+        }
+#endif
+        self& operator<<(const StringPiece& v)
+        {
+            buffer_.append(v.data(), v.size());
             return *this;
         }
 

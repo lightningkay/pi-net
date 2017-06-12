@@ -25,11 +25,11 @@ namespace pi
         {
         public:
             template<int N>
-            inline SourceFile(cosnt char(&arr)[N])
-                : data_(arr)
+            inline SourceFile(const char(&arr)[N])
+                : data_(arr),
                   size_(N - 1)
             {
-                cosnt char* slash = strrchr(data_,'/');
+                const char* slash = strrchr(data_, '/');
                 if (slash)
                 {
                     data_ = slash + 1;
@@ -37,7 +37,7 @@ namespace pi
                 }
             }
 
-            explicit SourceFile(const char* filename_)
+            explicit SourceFile(const char* filename)
                 : data_(filename)
             {
                 const char* slash = strrchr(filename, '/');
@@ -54,13 +54,13 @@ namespace pi
 
         Logger(SourceFile file, int line);
         Logger(SourceFile file, int line, LogLevel level);
-        Logger(SourceFile file, int line, LogLevel levle, const char* func);
+        Logger(SourceFile file, int line, LogLevel level, const char* func);
         Logger(SourceFile file, int line, bool toAbort);
         ~Logger();
 
         LogStream& stream() { return impl_.stream_; }
 
-        static LogLevel loglevle();
+        static LogLevel logLevel();
         static void setLogLevel(LogLevel level);
         typedef void (*OutputFunc)(const char* msg, int len);
         typedef void (*FlushFunc)();

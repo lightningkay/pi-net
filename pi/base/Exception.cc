@@ -17,11 +17,11 @@ Exception::Exception(const string& what)
     fillStackTrace();
 }
 
-Exceptoin::~Exception() throw()
+Exception::~Exception() throw()
 {
 }
 
-cosnt char* Exception::what() const throw()
+const char* Exception::what() const throw()
 {
     return message_.c_str();
 }
@@ -31,7 +31,7 @@ const char* Exception::stackTrace() const throw()
     return stack_.c_str();
 }
 
-void Exceptoin::fillStackTrace()
+void Exception::fillStackTrace()
 {
     const int len = 200;
     void* buffer[len];
