@@ -7,6 +7,7 @@ boosttest: CC = g++
 all:$(target)
 
 %.o:%.cc
+	$(CC) -c $< -o $@
 
 .PHONY:clean
 
