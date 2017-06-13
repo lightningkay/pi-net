@@ -3,7 +3,10 @@ LDFLAGS=
 CPPFLAGS=-I ../../../
 Test=AtomicUnitTest    \
 	MutexUnitTest      \
-	TimestampUnitTest
+	TimestampUnitTest  \
+	ThreadUnitTest     \
+
+
 all:$(Test)
 
 $(Test):
@@ -14,6 +17,17 @@ AtomicUnitTest: AtomicUnitTest.cc
 MutexUnitTest:  LDFLAGS += -lpthread
 
 MutexUnitTest:  MutexUnitTest.cc	\
+				../Thread.cc		\
+				../Logging.cc		\
+				../TimeZone.cc		\
+				../Timestamp.cc		\
+				../Date.cc			\
+				../Exception.cc		\
+				../LogStream.cc		\
+
+
+ThreadUnitTest:  LDFLAGS += -lpthread
+ThreadUnitTest: ThreadUnitTest.cc	\
 				../Thread.cc		\
 				../Logging.cc		\
 				../TimeZone.cc		\
