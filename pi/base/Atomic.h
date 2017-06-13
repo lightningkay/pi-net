@@ -19,11 +19,15 @@ namespace pi
 
                 T get()
                 {
-                    return __atomic_load_n(&value_, __ATOMIC_SEQ_CST);
+                    // gcc >= 4.7
+                    // return __atomic_load_n(&value_, __ATOMIC_SEQ_CST);
+                    return __sync_val_compare_and_swap(&value_, 0, 0);
                 }
                 T getAndAdd(T x)
                 {
-                    return __atomic_fetch_add(&value_, x, __ATOMIC_SEQ_CST);
+                    // gcc >= 4.7
+                    // return __atomic_fetch_add(&value_, x, __ATOMIC_SEQ_CST);
+                    return __sync_fetch_and_add(&value_, x);
                 }
                 T addAndGet(T x)
                 {
