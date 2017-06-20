@@ -1,6 +1,7 @@
 #ifndef PI_BASE_SINGLETON_H
 #define PI_BASE_SINGLETON_H
-#include <boost/noncopyable.h>
+
+#include <boost/noncopyable.hpp>
 #include <assert.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -12,20 +13,20 @@ namespace pi
         template <typename T>
         struct has_no_destroy
         {
-            template <typename C> static char test(typeof(&C:no_destroy));
+            template <typename C> static char test(typeof(&C::no_destroy));
             template <typename C> static int32_t test(...);
-            const static bool value = sizeof(test<T>(0) == 1);
+            const static bool value = sizeof(test<T>(0)) == 1;
         };
     }
 
-    template <typename T>
+    template<typename T>
     class Singleton : boost::noncopyable
     {
     public:
         static T& instance()
         {
             pthread_once(&ponce_, &Singleton::init);
-            assert(value != NULL);
+            assert(value_ != NULL);
             return *value_;
         }
     private:
@@ -53,10 +54,10 @@ namespace pi
     };
 
     template <typename T>
-    pthread_once_t ponce_ = PTHREAD_ONCE_INIT;
+    pthread_once_t Singleton<T>::ponce_ = PTHREAD_ONCE_INIT;
 
     template <typename T>
-    T* value_ = NULL;
+    T* Singleton<T>::value_ = NULL;
 }
 
 #endif
