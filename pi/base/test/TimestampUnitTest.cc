@@ -20,6 +20,5 @@ int main()
     assert(start_1000us < now);
     std::cout << "difference is " << timeDifference(start_1000us, now) << std::endl;
 
-
     return 0;
 }
