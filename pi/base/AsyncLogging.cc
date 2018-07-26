@@ -6,78 +6,67 @@
 
 using namespace pi;
 
-AsyncLogging::AsyncLogging(const string& basename,
-                           size_t roolSize,
-                           int flushInterval)
-    : flushInterval_(flushInterval)
-      running_(false),
-      basename_(basename),
-      roolSize_(roolSize),
-      thread_(boost::bind(&AsyncLogging::threadFunc, this), "Logging"),
-      latch(1),
-      mutex_(),
-      cond_(mutex_),
-      currentBuffer_(new Buffer),
-      nextBuffer_(new Buffer),
-      buffers_()
+AsyncLogging::AsyncLogging(const string& basename, size_t roolSize, int flushInterval) : _flushInterval(flushInterval), _running(false),
+    _basename(basename), _roolSize(roolSize), _thread(boost::bind(&AsyncLogging::threadFunc, this), "Logging"), _latch(1), _mutex(),
+    _cond(_mutex), _currentBuffer(new Buffer), _nextBuffer(new Buffer), _buffers()
 {
-    currentBuffer_.bzero();
-    nextBuffer_.bzero();
-    buffers_.reserve(16);
+    _currentBuffer.bzero();
+    _nextBuffer.bzero();
+    _buffers.reserve(16);
 }
 
 AsyncLogging::append(const char* logline, int len)
 {
-    pi::MutexLockGuard lock(mutex_);
-    if (currentBuffer_->avail() > len)
+    pi::MutexLockGuard lock(_mutex);
+    if (_currentBuffer->avail() > len)
     {
-        currentBuffer_->append(logline, len);
+        _currentBuffer->append(logline, len);
     }
     else
     {
-        buffers_.push_back(currentBuffer_.release());
+        _buffers.push_back(_currentBuffer.release());
 
-        if (nextBuffer_)
+        if (_nextBuffer)
         {
-            currentBuffer_ = boost::ptr_container::move(nextBuffer_);
+            _currentBuffer = boost::ptr_container::move(_nextBuffer);
         }
         else
         {
-            currentBuffer_.reset(new Buffer);
+            _currentBuffer.reset(new Buffer);
         }
-        currentBufffer_->append(logline, len);
-        cond_.notify();
+        _currentBufffer->append(logline, len);
+        _cond.notify();
     }
 }
 
 void AsyncLogging::threadFunc()
 {
     assert(running == true);
-    latch_.countDown();
-    LogFile output(basename_, rollSize, false);
+    _latch.countDown();
+    LogFile output(_basename, rollSize, false);
     BufferPtr newBuffer1(new Buffer);
     BufferPtr newBuffer2(new Buffer);
     newBuffer1->bzero();
     newBuffer2->bzero();
     BufferVector buffersToWrite;
     buffersToWrite.reserve(16);
-    while (running_)
+    while (_running)
     {
         assert(newBuffer1 && newBuffer1->length() == 0);
         assert(newBuffer2 && newBuffer2->length() == 0);
         assert(buffersToWrite.empty());
         {
-            pi::MutexLockGuard lock(mutex_);
-            if (buffers_.empty())
+            pi::MutexLockGuard lock(_mutex);
+            if (_buffers.empty())
             {
-                cond_.waitForSeconds(flushInterval_);
+                cond.waitForSeconds(_flushInterval);
             }
-            buffers_.push_back(currentBuffer_.release());
-            currentBuffer_ = boot::ptr_container::move(newBuffer1);
-            buffersToWrite.swap(buffers_);
-            if (!nextBuffer_)
+            _buffers.push_back(_currentBuffer.release());
+            _currentBuffer = boot::ptr_container::move(newBuffer1);
+            buffersToWrite.swap(_buffers);
+            if (!_nextBuffer)
             {
-                nextBuffer_ = boost::ptr_container::move(newBuffer2);
+                _nextBuffer = boost::ptr_container::move(newBuffer2);
             }
         }
 

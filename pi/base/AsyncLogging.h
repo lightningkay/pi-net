@@ -1,5 +1,5 @@
-#ifndef PI_BASE_ASYNCLOGGING_H
-#define PI_BASE_ASYNCLOGGING_H
+#ifndef __ASYNCLOGGING_H
+#define __ASYNCLOGGING_H
 
 #include <pi/base/BlockingQueue.h>
 #include <pi/base/BoundedBlockingQueue.h>
@@ -18,12 +18,10 @@ namespace pi
     class AsyncLogging : boost::noncopyable
     {
     public:
-        AsyncLogging(const string& basename,
-                     size_t rollSize,
-                     int flushInterval = 3);
+        AsyncLogging(const string& basename, size_t rollSize, int flushInterval = 3);
         ~AsyncLogging()
         {
-            if (running_)
+            if (_running)
             {
                 stop();
             }
@@ -32,16 +30,16 @@ namespace pi
         void append(const char* logline, int len);
         void start()
         {
-            running_ = true;
-            thread_.start();
-            latch_.wait();
+            _running = true;
+            _thread.start();
+            _latch.wait();
         }
 
         void stop()
         {
             running_ = false;
-            cond_.notify();
-            thread_.join();
+            _cond.notify();
+            _thread.join();
         }
 
     private:
@@ -54,18 +52,18 @@ namespace pi
         typedef boost::ptr_vector<Buffer> BufferVector;
         typedef BufferVector::auto_type BufferPtr;
 
-        const int flushInterval_;
-        bool running_;
-        string basename_;
-        size_t roolSize_;
-        pi::Thread thread_;
-        pi::CountDownLatch latch_;
-        pi::MutexLock mutex_;
-        pi::Condition cond_;
-        BufferPtr currentBuffer_;
-        BufferPtr nextBuffer_;
-        BufferVector buffers_;
+        const int _flushInterval;
+        bool _running;
+        string _basename;
+        size_t _roolSize;
+        pi::Thread _thread;
+        pi::CountDownLatch _latch;
+        pi::MutexLock _mutex;
+        pi::Condition _cond;
+        BufferPtr _currentBuffer;
+        BufferPtr _nextBuffer;
+        BufferVector _buffers;
     };
 }
 
-#endif
+#endif //__ASYNCLOGGING_H

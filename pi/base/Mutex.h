@@ -1,5 +1,5 @@
-#ifndef PI_BASE_MUTEX_H
-#define PI_BASE_MUTEX_H
+#ifndef __MUTEX_H
+#define __MUTEX_H
 
 #include <pi/base/CurrentThread.h>
 #include <boost/noncopyable.hpp>
@@ -35,12 +35,12 @@ namespace pi
         MutexLock()
             : holder_(0)
         {
-            MCHECK(pthread_mutex_init(&mutex_, NULL));
+            MCHECK(pthread_mutex_init(&_mutex, NULL));
         }
         ~MutexLock()
         {
             assert(holder_ == 0);
-            MCHECK(pthread_mutex_destroy(&mutex_));
+            MCHECK(pthread_mutex_destroy(&_mutex));
         }
 
         bool isLockByThisThread() const
@@ -50,19 +50,19 @@ namespace pi
 
         void lock()
         {
-            MCHECK(pthread_mutex_lock(&mutex_));
+            MCHECK(pthread_mutex_lock(&_mutex));
             assignHolder();
         }
 
         void unlock()
         {
             unassignHolder();
-            MCHECK(pthread_mutex_unlock(&mutex_));
+            MCHECK(pthread_mutex_unlock(&_mutex));
         }
 
         pthread_mutex_t* getPthreadMutex()
         {
-            return &mutex_;
+            return &_mutex;
         }
     private:
         friend class Condition;
@@ -71,17 +71,17 @@ namespace pi
         {
         public:
             UnassignGuard(MutexLock& owner)
-                : owner_(owner)
+                : _owner(owner)
             {
-                owner_.unassignHolder();
+                _owner.unassignHolder();
             }
 
             ~UnassignGuard()
             {
-                owner_.assignHolder();
+                _owner.assignHolder();
             }
         private:
-            MutexLock& owner_;
+            MutexLock& _owner;
         };
 
         void unassignHolder()
@@ -94,7 +94,7 @@ namespace pi
             holder_ = CurrentThread::tid();
         }
 
-        pthread_mutex_t mutex_;
+        pthread_mutex_t _mutex;
         pid_t holder_;
     };
 
@@ -102,16 +102,16 @@ namespace pi
     {
     public:
         MutexLockGuard(MutexLock& mutex)
-            : mutex_(mutex)
+            : _mutex(mutex)
         {
-            mutex_.lock();
+            _mutex.lock();
         }
         ~MutexLockGuard()
         {
-            mutex_.unlock();
+            _mutex.unlock();
         }
     private:
-        MutexLock& mutex_;
+        MutexLock& _mutex;
     };
 }
-#endif
+#endif //__MUTEX_H

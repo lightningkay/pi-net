@@ -23,24 +23,24 @@ namespace pi
         void start();
         int join();
 
-        bool started() { return started_; }
+        bool started() { return _started; }
 
-        pid_t tid() const  { return tid_; }
-        const string& name() const { return name_; }
-        static int numCreated() { return numCreated_.get(); }
+        pid_t tid() const  { return _tid; }
+        const string& name() const { return _name; }
+        static int numCreated() { return _numCreated.get(); }
 
     private:
         void setDefaultName();
 
-        bool started_;
-        bool joined_;
-        pthread_t pthreadId_;
-        pid_t tid_;
-        ThreadFunc func_;
-        string name_;
-        CountDownLatch latch_;
+        bool _started;
+        bool _joined;
+        pthread_t _pthreadId;
+        pid_t _tid;
+        ThreadFunc _func;
+        string _name;
+        CountDownLatch _latch;
 
-        static AtomicInt32 numCreated_;
+        static AtomicInt32 _numCreated;
     };
 }
 
