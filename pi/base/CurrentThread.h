@@ -2,6 +2,7 @@
 #define PI_BASE_CURRENTTHREAD_H
 
 #include <stdint.h>
+#include <stdio.h>
 
 namespace pi
 {

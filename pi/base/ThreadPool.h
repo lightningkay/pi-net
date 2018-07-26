@@ -1,5 +1,5 @@
-#ifndef PI_BASE_THREADPOOL_H
-#define PI_BASE_THREADPOOL_H
+#ifndef __THREADPOOL_H
+#define __THREADPOOL_H
 
 #include <pi/base/Condition.h>
 #include <pi/base/Mutex.h>
@@ -54,4 +54,4 @@ private:
 };
 
 }
-#endif
+#endif // __THREADPOOL_H

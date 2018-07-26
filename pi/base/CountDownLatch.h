@@ -25,4 +25,4 @@ namespace pi
         int _count;
     }
 }
-#endif
+#endif // __COUNTDOWNLATCH_H

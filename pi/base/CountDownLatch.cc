@@ -25,4 +25,3 @@ int getCount() const
     MutexLockGuard lock(_mutex);
     return _count;
 }
-

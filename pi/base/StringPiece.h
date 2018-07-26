@@ -32,7 +32,7 @@ namespace pi
         const char* str_;
     };
 
-    class StringPiece 
+    class StringPiece
     {
     private:
         const char* ptr_;

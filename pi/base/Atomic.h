@@ -59,9 +59,9 @@ namespace pi
         private:
             volatile T _value;
         };
-    };
+    }
     typedef detail::AtomicIntegerT<int32_t> AtomicInt32;
     typedef detail::AtomicIntegerT<int64_t> AtomicInt64;
 }
 
-#endif //__BASE_ATOMIC_H
+#endif //__ATOMIC_H

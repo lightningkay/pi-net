@@ -45,4 +45,4 @@ namespace pi
     };
 }
 
-#endif
+#endif // __CONDITION_H
