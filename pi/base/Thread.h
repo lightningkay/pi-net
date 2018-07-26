@@ -25,7 +25,7 @@ namespace pi
 
         bool started() { return started_; }
 
-        pid_t tid() const  { return *tid_; }
+        pid_t tid() const  { return tid_; }
         const string& name() const { return name_; }
         static int numCreated() { return numCreated_.get(); }
 
@@ -35,9 +35,11 @@ namespace pi
         bool started_;
         bool joined_;
         pthread_t pthreadId_;
-        boost::shared_ptr<pid_t> tid_;
+        pid_t tid_;
         ThreadFunc func_;
         string name_;
+        CountDownLatch latch_;
+
         static AtomicInt32 numCreated_;
     };
 }

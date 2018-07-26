@@ -38,6 +38,7 @@ namespace pi
         {
             pi::CurrentThread::t_cachedTid = 0;
             pi::CurrentThread::t_threadName = "main";
+            CurrentThread::tid();
         }
 
         class ThreadNameInitializer
@@ -58,29 +59,29 @@ namespace pi
             typedef pi::Thread::ThreadFunc ThreadFunc;
             ThreadFunc func_;
             string name_;
-            boost::weak_ptr<pid_t> wkTid_;
+            pid_t* tid_;
+            CountDownLatch* latch_;
 
             ThreadData(const ThreadFunc& func,
                     const string &name,
-                    const boost::shared_ptr<pid_t>& tid)
+                    pid_t* tid,
+                    CountDownLatch* latch)
                 : func_(func),
-                name_(name),
-                wkTid_(tid)
+                  name_(name),
+                  tid_(tid),
+                  latch_(latch)
             {  }
 
             void runInThread()
             {
-                pid_t tid = pi::CurrentThread::tid();
+                *tid_ = pi::CurrentThread::tid();
+                tid_ = NULL;
+                latch_->countDown();
+                latch_ = NULL;
 
-                boost::shared_ptr<pid_t> ptid = wkTid_.lock();
-                if (ptid)
-                {
-                    *ptid = tid;
-                    ptid.reset();
-                }
-
-                pi::CurrentThread::t_threadName = name_.empty() ? "piThread" : name_.c_str();
+                pi::CurrentThread::t_threadName = name_.empty() ? "muduoThread" : name_.c_str();
                 ::prctl(PR_SET_NAME, pi::CurrentThread::t_threadName);
+
                 try
                 {
                     func_();
@@ -141,9 +142,10 @@ Thread::Thread(const ThreadFunc& func, const string& n)
     : started_(false),
       joined_(false),
       pthreadId_(0),
-      tid_(new pid_t(0)),
+      tid_(0),
       func_(func),
-      name_(n)
+      name_(n),
+      latch_(1)
 {
     setDefaultName();
 }
