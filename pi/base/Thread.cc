@@ -57,46 +57,46 @@ namespace pi
         struct ThreadData
         {
             typedef pi::Thread::ThreadFunc ThreadFunc;
-            ThreadFunc func_;
-            string name_;
-            pid_t* tid_;
-            CountDownLatch* latch_;
+            ThreadFunc _func;
+            string _name;
+            pid_t* _tid;
+            CountDownLatch* _latch;
 
             ThreadData(const ThreadFunc& func,
                     const string &name,
                     pid_t* tid,
                     CountDownLatch* latch)
-                : func_(func),
-                  name_(name),
-                  tid_(tid),
-                  latch_(latch)
+                : _func(func),
+                  _name(name),
+                  _tid(tid),
+                  _latch(latch)
             {  }
 
             void runInThread()
             {
-                *tid_ = pi::CurrentThread::tid();
-                tid_ = NULL;
-                latch_->countDown();
-                latch_ = NULL;
+                *_tid = pi::CurrentThread::tid();
+                _tid = NULL;
+                _latch->countDown();
+                _latch = NULL;
 
-                pi::CurrentThread::t_threadName = name_.empty() ? "muduoThread" : name_.c_str();
+                pi::CurrentThread::t_threadName = _name.empty() ? "muduoThread" : _name.c_str();
                 ::prctl(PR_SET_NAME, pi::CurrentThread::t_threadName);
 
                 try
                 {
-                    func_();
+                    _func();
                     pi::CurrentThread::t_threadName = "finished";
                 }
                 catch (const Exception& ex)
                 {
                     pi::CurrentThread::t_threadName = "crashed";
-                    fprintf(stderr, "exception caught in Thread %s\n", name_.c_str());
+                    fprintf(stderr, "exception caught in Thread %s\n", _name.c_str());
                     fprintf(stderr, "reason: %s\n", ex.what());
                 }
                 catch (...)
                 {
                     pi::CurrentThread::t_threadName = "crashed";
-                    fprintf(stderr, "unknown exception caught in Thread %s\n", name_.c_str());
+                    fprintf(stderr, "unknown exception caught in Thread %s\n", _name.c_str());
                     throw;
                 }
             }
@@ -139,44 +139,44 @@ void CurrentThread::sleepUsec(int64_t usec)
 AtomicInt32 Thread::numCreated_;
 
 Thread::Thread(const ThreadFunc& func, const string& n)
-    : started_(false),
-      joined_(false),
-      pthreadId_(0),
-      tid_(0),
-      func_(func),
-      name_(n),
-      latch_(1)
+    : _started(false),
+      _joined(false),
+      _pthreadId(0),
+      _tid(0),
+      _func(func),
+      _name(n),
+      _latch(1)
 {
     setDefaultName();
 }
 
 Thread::~Thread()
 {
-    if (started_ && !joined_)
+    if (_started && !_joined)
     {
-        pthread_detach(pthreadId_);
+        pthread_detach(_pthreadId);
     }
 }
 
 void Thread::setDefaultName()
 {
-    int num = numCreated_.incrementAndGet();
-    if (name_.empty())
+    int num = _numCreated.incrementAndGet();
+    if (_name.empty())
     {
         char buf[32];
         snprintf(buf, sizeof buf, "Thread%d", num);
-        name_ = buf;
+        _name = buf;
     }
 }
 
 void Thread::start()
 {
-    assert(!started_);
-    started_ = true;
-    detail::ThreadData* data = new detail::ThreadData(func_, name_, tid_);
-    if (pthread_create(&pthreadId_, NULL, &detail::startThread, data))
+    assert(!_started);
+    _started = true;
+    detail::ThreadData* data = new detail::ThreadData(_func, _name, &_tid, &_latch);
+    if (pthread_create(&_pthreadId, NULL, &detail::startThread, data))
     {
-        started_ = false;
+        _started = false;
         delete data;
         LOG_SYSFATAL << "Faied in pthread_create";
     }
@@ -184,8 +184,8 @@ void Thread::start()
 
 int Thread::join()
 {
-    assert(started_);
-    assert(!joined_);
-    joined_ = true;
-    return pthread_join(pthreadId_, NULL);
+    assert(_started);
+    assert(!_joined);
+    _joined = true;
+    return pthread_join(_pthreadId, NULL);
 }

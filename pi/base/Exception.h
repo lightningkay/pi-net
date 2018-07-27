@@ -18,8 +18,8 @@ namespace pi
     private:
         void fillStackTrace();
 
-        string message_;
-        string stack_;
+        string _message;
+        string _stack;
     };
 }
 #endif

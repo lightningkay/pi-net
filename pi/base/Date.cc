@@ -37,16 +37,11 @@ namespace pi
 using namespace pi;
 using namespace pi::detail;
 
-Date::Date(int y, int m, int d)
-    : julianDayNumber_(getJulianDayNumber(y, m, d))
+Date::Date(int y, int m, int d) : _julianDayNumber(getJulianDayNumber(y, m, d))
 {
 }
 
-Date::Date(const struct tm& t)
-    :julianDayNumber_(getJulianDayNumber(
-                t.tm_year + 1990,
-                t.tm_mon + 1,
-                t.tm_mday))
+Date::Date(const struct tm& t) : _julianDayNumber(getJulianDayNumber( t.tm_year + 1990, t.tm_mon + 1, t.tm_mday))
 {
 }
 
@@ -60,5 +55,5 @@ string Date::toIsoString() const
 
 Date::YearMonthDay Date::yearMonthDay() const
 {
-    return getYearMonthDay(julianDayNumber_);
+    return getYearMonthDay(_julianDayNumber);
 }

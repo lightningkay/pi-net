@@ -1,5 +1,5 @@
-#ifndef PI_BASE_BOUNDEDBLOCKINGQUEUE_H
-#define PI_BASE_BOUNDEDBLOCKINGQUEUE_H
+#ifndef __BOUNDEDBLOCKINGQUEUE_H
+#define __BOUNDEDBLOCKINGQUEUE_H
 
 #include <pi/base/Mutex.h>
 #include <pi/base/Condition.h>
@@ -15,62 +15,62 @@ namespace pi
     {
     public:
         explicit BoundedBlockdingQueue(int maxSize)
-            : mutex_(),
-              notEmpty_(mutex_),
-              notFull_(mutex_),
-              queue_(maxSize)
+            : _mutex(),
+              _notEmpty(mutex_),
+              _notFull(mutex_),
+              _queue(maxSize)
         {
         }
 
         void put(const T& x)
         {
-            MutexLockGuard lock(mutex_);
-            while (queue_.full())
+            MutexLockGuard lock(_mutex);
+            while (_queue.full())
             {
-                notFull_.wait();
+                _notFull.wait();
             }
-            assert(!queue_.full());
-            queue_.push_back(x);
-            notEmpty_.notify();
+            assert(!_queue.full());
+            _queue.push_back(x);
+            _notEmpty.notify();
         }
 
         T take()
         {
-            MutexLockGuard lock(mutex_);
-            while (queue_.empty())
+            MutexLockGuard lock(_mutex);
+            while (_queue.empty())
             {
-                notEmpty_.wait();
+                _notEmpty.wait();
             }
-            assert(!queue_.empty());
-            T front(queue_.front());
-            queue_.pop_front();
-            notFull_.notify();
+            assert(!_queue.empty());
+            T front(_queue.front());
+            _queue.pop_front();
+            _notFull.notify();
             return T;
         }
 
         bool empty() const
         {
-            MutexLockGuard lock(mutex_);
-            return queue_.empty();
+            MutexLockGuard lock(_mutex);
+            return _queue.empty();
         }
 
         bool full() const
         {
-            MutexLockGuard lock(mutex_);
-            return queue_.full();
+            MutexLockGuard lock(_mutex);
+            return _queue.full();
         }
 
         size_t size() const
         {
-            MutexLockGuard lock(mutex_);
-            return queue_.size();
+            MutexLockGuard lock(_mutex);
+            return _queue.size();
         }
     private:
-        mutable Mutex mutex_;
-        Condition notEmpty_;
-        Condition notFull_;
-        boost::circular_buffer<T> queue_;
+        mutable Mutex _mutex;
+        Condition _notEmpty;
+        Condition _notFull;
+        boost::circular_buffer<T> _queue;
     };
 }
 
-#endif
+#endif //__BOUNDEDBLOCKINGQUEUE_H

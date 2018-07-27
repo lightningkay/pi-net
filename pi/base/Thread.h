@@ -1,5 +1,5 @@
-#ifndef PI_BASE_THREAD_H
-#define PI_BASE_TRHEAD_H
+#ifndef __THREAD_H
+#define __TRHEAD_H
 
 #include <pi/base/Atomic.h>
 #include <pi/base/Types.h>
@@ -44,4 +44,4 @@ namespace pi
     };
 }
 
-#endif
+#endif //__THREAD_H

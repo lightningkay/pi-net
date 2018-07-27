@@ -6,13 +6,13 @@
 using namespace pi;
 
 Exception::Exception(const char* what)
-    : message_(what)
+    : _message(what)
 {
     fillStackTrace();
 }
 
 Exception::Exception(const string& what)
-    : message_(what)
+    : _message(what)
 {
     fillStackTrace();
 }
@@ -23,12 +23,12 @@ Exception::~Exception() throw()
 
 const char* Exception::what() const throw()
 {
-    return message_.c_str();
+    return _message.c_str();
 }
 
 const char* Exception::stackTrace() const throw()
 {
-    return stack_.c_str();
+    return _stack.c_str();
 }
 
 void Exception::fillStackTrace()
@@ -41,8 +41,8 @@ void Exception::fillStackTrace()
     {
         for (int i = 0; i < nptrs; ++i)
         {
-            stack_.append(strings[i]);
-            stack_.push_back('\n');
+            _stack.append(strings[i]);
+            _stack.push_back('\n');
         }
         free(strings);
     }

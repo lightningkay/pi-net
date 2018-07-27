@@ -1,5 +1,5 @@
-#ifndef PI_BASE_BLOCKINGQUEUE_H
-#define PI_BASE_BLOCKINGQUEUE_H
+#ifndef __BLOCKINGQUEUE_H
+#define __BLOCKINGQUEUE_H
 #include <pi/base/Condition.h>
 #include <pi/base/Mutex.h>
 
@@ -14,45 +14,45 @@ namespace pi
     {
     public:
         BlockingQueue()
-            : mutex_(),
-              notEmpty_(mutex_()),
-              queue_()
+            : _mutex(),
+              _notEmpty(_mutex()),
+              _queue()
         {
         }
 
         void put(const T& x)
         {
-            MutexLockGuard lock(mutex_);
-            queue_.push_back(x);
-            notEmpty.notify();
+            MutexLockGuard lock(_mutex);
+            _queue.push_back(x);
+            _notEmpty.notify();
         }
 
         T take()
         {
-            MutexLockGuard lock(mutex_);
+            MutexLockGuard lock(_mutex);
 
-            while (queue_.empty())
+            while (_queue.empty())
             {
-                notEmpty.wait();
+                _notEmpty.wait();
             }
 
-            assert(!queue_.empty());
-            T front(queue_.front());
-            queue_.pop_front();
+            assert(!_queue.empty());
+            T front(_queue.front());
+            _queue.pop_front();
             return front;
         }
 
         size_t size() const
         {
-            MutexLockGuard lock(mutex_);
-            return queue_.size();
+            MutexLockGuard lock(_mutex);
+            return _queue.size();
         }
 
     private:
-        mutable Mutex mutex_;
-        Condition notEmpty_;
-        std::queue<T> queue_;
+        mutable Mutex _mutex;
+        Condition _notEmpty;
+        std::queue<T> _queue;
     };
 }
 
-#endif
+#endif //__BLOCKINGQUEUE_H
